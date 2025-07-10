@@ -1,3 +1,5 @@
+# og69x_reset_bot.py
+
 import asyncio, uuid, string, random, requests, os
 from telegram.ext import (
     ApplicationBuilder, CommandHandler,
@@ -6,15 +8,15 @@ from telegram.ext import (
 
 # 🔐 Bot Config
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-TARGET_THREAD_ID = 26
-CHAT_ID = -1002886524212
+TARGET_THREAD_ID = 26  # ✅ Only reply in this topic/thread
+CHAT_ID = -1002886524212  # Optional, use if needed
 
 # ✅ /start command
 async def start(update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "👋 Welcome to *OG69x Reset*!\n"
         "Send me an Instagram **username** or **email** \n"
-        "Warninig! Only Works in @og69y",
+        "⚠️ Warning: Only works in @og69y group.",
         parse_mode="Markdown"
     )
 
@@ -31,9 +33,10 @@ async def get_thread_id(update, context):
         parse_mode="Markdown"
     )
 
-# 🔁 Main reset message handler
+# 🔁 Handle messages
 async def handle_message(update, context):
     thread_id = update.message.message_thread_id
+
     if thread_id is None or thread_id != TARGET_THREAD_ID:
         print("❌ Ignored: Wrong thread or main group")
         return
@@ -52,7 +55,7 @@ async def handle_message(update, context):
     final_text = f"{result}\n\n🔚 Powered by [@og69x](https://t.me/og69x)"
     await sent.edit_text(final_text, parse_mode="Markdown", disable_web_page_preview=True)
 
-# 🔐 Instagram reset logic
+# 🔐 Reset function
 def send_password_reset(target: str) -> str:
     target = target.strip()
     if target.startswith("@"):
@@ -84,13 +87,21 @@ def send_password_reset(target: str) -> str:
         return "✅ Password reset link sent!"
     return f"❌ Failed: {res.text}"
 
-# 🚀 Bootstrap bot
+# ❗ Error handler
+async def error_handler(update, context):
+    print(f"❌ Exception: {context.error}")
+
+# 🚀 Start the bot
 def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
+
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("ping", ping))
     app.add_handler(CommandHandler("id", get_thread_id))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    app.add_error_handler(error_handler)
+
     print("🤖 OG69x Bot running…")
     app.run_polling()
 
