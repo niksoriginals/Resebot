@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: og69x-reset-bot
+    env: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: python og69x_reset_bot.py
+    autoDeploy: true
