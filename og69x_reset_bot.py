@@ -67,13 +67,13 @@ async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     status_message = await update.message.reply_text("✅ Got it...")
 
     # Step 2: Simulate progress with edits
-    await asyncio.sleep(1)
+    await asyncio.sleep(.5)
     await status_message.edit_text("⏳ Processing your request...")
     
-    await asyncio.sleep(1.3)
+    await asyncio.sleep(1)
     await status_message.edit_text("🚀 *Powered by* [@og69x]")
 
-    await asyncio.sleep(1.6)
+    await asyncio.sleep(1.2)
     await status_message.edit_text("📡 Sending password reset request to Instagram...")
 
     # Step 3: Perform actual reset
