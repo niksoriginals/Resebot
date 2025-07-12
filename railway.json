@@ -1,8 +1,0 @@
-{
-  "build": {
-    "env": {
-      "BOT_TOKEN": "your-real-telegram-bot-token"
-    }
-  },
-  "start": "python og69x_reset_bot.py"
-}
