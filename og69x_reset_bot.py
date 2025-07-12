@@ -79,7 +79,7 @@ async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Step 3: Perform actual reset
     result = send_password_reset(target)
     await asyncio.sleep(1)
-    await status_message.edit_text(f"{result}\n\nPowered by [@og69x](https://t.me/og69x)", parse_mode="Markdown", disable_web_page_preview=True)
+    await status_message.edit_text(f"{result}\nPowered by [@og69x](https://t.me/og69x)", parse_mode="Markdown", disable_web_page_preview=True)
 
 def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
