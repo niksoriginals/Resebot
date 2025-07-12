@@ -1,12 +1,11 @@
-
 import os
+import asyncio
 import uuid
 import string
 import random
 import requests
-import asyncio
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 # --- Config from environment variables (set these in Railway/Render) ---
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
@@ -17,7 +16,7 @@ def send_password_reset(target: str):
     """Send Instagram password reset request."""
     target = target.strip()
     if target.startswith("@"):
-        return "🚫 Please send username without '@'"
+        return "Send username without @"
     data = {
         "user_email": target if "@" in target else "",
         "username": target if "@" not in target else "",
@@ -39,68 +38,48 @@ def send_password_reset(target: str):
             timeout=10
         )
         if resp.status_code == 200 and "obfuscated_email" in resp.text:
-            return f"✅ Reset link sent successfully!"
+            return f"✅ Success"
         else:
-            return f"❌ Failed to send reset: {resp.text}"
+            return f"❌ Failed: {resp.text}"
     except Exception as e:
         return f"❌ Error: {e}"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "👋 Welcome to *OG69x Reset Bot*!
-"
-        "Use the command:
-"
-        "`/reset <username/email>`
-"
-        "to request a password reset.
-
-"
-        "🔒 Works only in @og69y group/topic.",
+        "Welcome to *OG69x Reset*!\n"
+        "Send /reset <username/email> to use the reset function.\n"
+        "Works only in @og69y group/topic.",
         parse_mode="Markdown"
     )
 
 async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Restrict to specific thread/topic
+    # Restrict to specific thread/topic if set
     if TARGET_THREAD_ID and (update.effective_message.message_thread_id != TARGET_THREAD_ID):
         return
-    if CHAT_ID and (update.effective_chat.id != CHAT_ID):
-        return
+    # Restrict to specific chat if set
+    # if CHAT_ID and (update.effective_chat.id != CHAT_ID):
+    #     return
     if not context.args:
-        await update.message.reply_text("📌 Usage:
-`/reset <username or email>`", parse_mode="Markdown")
+        await update.message.reply_text("Usage: /reset <username or email>")
         return
-
     target = " ".join(context.args)
+    # Step 1: Send initial message
+    status_message = await update.message.reply_text("✅ Got it...")
 
-    # Auto-delete user command message for clean look
-    try:
-        await update.message.delete()
-    except:
-        pass  # ignore if bot lacks permission
-
-    # Progress message
-    status_message = await update.effective_chat.send_message("✅ Got it...")
-
-    await asyncio.sleep(1.2)
+    # Step 2: Simulate progress with edits
+    await asyncio.sleep(1)
     await status_message.edit_text("⏳ Processing your request...")
-
-    await asyncio.sleep(1.5)
+    
+    await asyncio.sleep(1.3)
     await status_message.edit_text("🚀 *Powered by* [@og69x]")
 
-    await asyncio.sleep(1.8)
+    await asyncio.sleep(1.6)
     await status_message.edit_text("📡 Sending password reset request to Instagram...")
 
+    # Step 3: Perform actual reset
     result = send_password_reset(target)
-
-    await asyncio.sleep(1.2)
-    await status_message.edit_text(
-        f"{result}
-
-🚀 *Powered by* [@og69x](https://t.me/og69x)",
-        parse_mode="Markdown",
-        disable_web_page_preview=True
-    )
+    await asyncio.sleep(1)
+    await status_message.edit_text(f"{result}\n\nPowered by [@og69x](https://t.me/og69x)", parse_mode="Markdown", disable_web_page_preview=True)
 
 def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
@@ -110,4 +89,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
