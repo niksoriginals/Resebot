@@ -8,8 +8,9 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 # --- Config from environment variables (set these in Railway/Render) ---
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
-TARGET_THREAD_ID = int(os.environ.get("TARGET_THREAD_ID", "0"))  # Set to 0 to disable thread check
-CHAT_ID = int(os.environ.get("CHAT_ID", "0"))  # Optional, set to 0 to allow all
+TARGET_THREAD_ID = int(os.environ.get("TARGET_THREAD_ID", "0"))
+CHAT_ID = int(os.environ.get("CHAT_ID", "0"))
+
 
 def send_password_reset(target: str):
     """Send Instagram password reset request."""
@@ -53,11 +54,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Restrict to specific thread/topic if set
-    if TARGET_THREAD_ID and (update.effective_message.message_thread_id != TARGET_THREAD_ID):
-        return
+    #if TARGET_THREAD_ID and (update.effective_message.message_thread_id != TARGET_THREAD_ID):
+    #    return
     # Restrict to specific chat if set
-    if CHAT_ID and (update.effective_chat.id != CHAT_ID):
-        return
+    #if CHAT_ID and (update.effective_chat.id != CHAT_ID):
+    #    return
     if not context.args:
         await update.message.reply_text("Usage: /reset <username or email>")
         return
