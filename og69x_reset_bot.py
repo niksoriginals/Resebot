@@ -12,7 +12,6 @@ except ImportError:
     os.system('pip install python-cfonts')
     from cfonts import render
 
-# Banner (optional)
 CF = render('OG69X Reset', colors=['white', 'cyan'], align='center')
 print(CF)
 
@@ -21,15 +20,28 @@ CHAT_ID = int(os.environ.get("CHAT_ID", "0"))
 TARGET_THREAD_ID = int(os.environ.get("TARGET_THREAD_ID", "0"))
 
 def is_allowed(update: Update) -> bool:
-    # Only allow in the specified group/thread
     if update.effective_chat.id != CHAT_ID:
         return False
     if update.effective_message.message_thread_id and update.effective_message.message_thread_id != TARGET_THREAD_ID:
         return False
     return True
 
+def get_free_proxy():
+    """
+    Returns a random HTTP proxy from free-proxy-list.net (only non-HTTPS, non-anonymous for best chance).
+    """
+    try:
+        resp = requests.get("https://www.proxy-list.download/api/v1/get?type=http", timeout=10)
+        proxies = resp.text.strip().split('\r\n')
+        proxies = [p for p in proxies if p]  # Remove empty
+        if not proxies:
+            return None
+        return random.choice(proxies)
+    except Exception as e:
+        print(f"Proxy fetch error: {e}")
+        return None
+
 def base_reset_logic(target):
-    # === YAHI AAPKA BASE CODE HAI, KUCH NA BADLA ===
     if target.startswith("@"):
         return "[ - ] Enter User Without '@'"
 
@@ -57,12 +69,20 @@ def base_reset_logic(target):
             f"{''.join(random.choices(string.ascii_lowercase + string.digits, k=16))}; en_GB;)"
         )
     }
+    proxy_addr = get_free_proxy()
+    if not proxy_addr:
+        return "[ ! ] Could not fetch free proxy. Try again later."
+    proxies = {
+        "http": f"http://{proxy_addr}",
+        "https": f"http://{proxy_addr}"
+    }
     try:
         req = requests.post(
             "https://i.instagram.com/api/v1/accounts/send_password_reset/",
             headers=head,
             data=data,
-            timeout=10
+            proxies=proxies,
+            timeout=15
         )
         if "obfuscated_email" in req.text:
             return f"[ + ] {req.text}"
@@ -71,7 +91,7 @@ def base_reset_logic(target):
         else:
             return f"[ - ] {req.text}"
     except Exception as e:
-        return f"[ ! ] Error: {e}"
+        return f"[ ! ] Error (proxy {proxy_addr}): {e}"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -87,7 +107,7 @@ async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❗ Usage:\n/reset <username/email>")
         return
     target = args[0]
-    msg = await update.message.reply_text("⏳ Sending Instagram reset request...")
+    msg = await update.message.reply_text("⏳ Fetching free proxy & sending Instagram reset request...")
     result = base_reset_logic(target)
     await msg.edit_text(result)
 
