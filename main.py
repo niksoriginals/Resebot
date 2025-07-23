@@ -42,7 +42,7 @@ def send_reset_request(target):
         json_data = response.json()
 
         if "obfuscated_email" in json_data:
-            return f"✅ *Reset Sent!*\n🔒 `Email`: `{json_data['obfuscated_email\n ©️ by @og69x '}`"
+            return f"✅ *Reset Sent!*\n🔒 `Email`: `{json_data['obfuscated_email']}`\n\n©️ by @og69x"
         elif "message" in json_data:
             return f"❌ *Failed*: {json_data['message']}"
         else:
