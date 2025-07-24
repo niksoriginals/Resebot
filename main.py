@@ -157,7 +157,7 @@ def handle_reset_command(message):
 # === LISTEN ONLY FOR /tiktok COMMAND IN THREAD ===
 
 @bot.message_handler(commands=['tiktok'])
-def handle_reset_command(message):
+def handle_tiktok_command(message):
     if message.chat.id != GROUP_CHAT_ID or message.message_thread_id != THREAD_ID:
         return  # Ignore messages outside the target thread
 
