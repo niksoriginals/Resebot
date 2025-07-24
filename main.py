@@ -42,7 +42,7 @@ def send_reset_request(target):
         json_data = response.json()
 
         if "obfuscated_email" in json_data:
-            return f"✅ *Reset Sent!*\n🔒 `Email`: `{json_data['obfuscated_email']}`\n\n©️ by @og69x"
+            return f"✅ *Instagram Reset Sent!*\n🔒 `Email`: `{json_data['obfuscated_email']}`\n\n©️ by @og69x"
         elif "message" in json_data:
             return f"❌ *Failed*: {json_data['message']}"
         else:
@@ -137,7 +137,7 @@ def tiktok(target):
         
         if data.get("message") == "success":
             obfuscated_email = data["data"]["email"]
-            return f"✅ *Reset Sent!*\n🔒 `Email`: `{obfuscated_email}`\n\n©️ by @og69x"
+            return f"✅ *TikTok Reset Sent!*\n🔒 `Email`: `{obfuscated_email}`\n\n©️ by @og69x"
         else:
             return f"❌ *Failed*: `{data.get('message', 'Unknown error')}`"
     except requests.exceptions.RequestException as e:
