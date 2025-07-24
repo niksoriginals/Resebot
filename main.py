@@ -167,7 +167,7 @@ def handle_reset_command(message):
         return
 
     target = parts[1].strip()
-    response_text = send_reset_request(target)
+    response_text = tiktok(target)
     bot.reply_to(message, response_text, parse_mode="Markdown")
 # === START BOT ===
 print("🤖 Bot is running...")
