@@ -135,7 +135,8 @@ def tiktok(target):
         response = session.post(url, params=params, data=payload, headers=headers)
         return f"📨 *TikTok Response*:\n```{response.text}```"
     except requests.exceptions.RequestException as e:
-        return f"("Error:", {e})"
+        return f"❌ *Request Error*: {e}"
+
 
 
 # === LISTEN ONLY FOR /reset COMMAND IN THREAD ===
