@@ -133,10 +133,17 @@ def tiktok(target):
 
     try:
         response = session.post(url, params=params, data=payload, headers=headers)
-        return f"📨 *TikTok Response*:\n```{response.text}```"
+        data = response.json()
+        
+        if data.get("message") == "success":
+            obfuscated_email = data["data"]["email"]
+            return f"✅ *Reset Sent!*\n🔒 `Email`: `{obfuscated_email}`\n\n©️ by @og69x"
+        else:
+            return f"❌ *Failed*: `{data.get('message', 'Unknown error')}`"
     except requests.exceptions.RequestException as e:
-        return f"❌ *Request Error*: {e}"
-
+        return f"❌ *Request Error*: `{str(e)}`"
+    except ValueError:
+        return f"❌ *Invalid Response*:\n```{response.text}```"
 
 
 # === LISTEN ONLY FOR /reset COMMAND IN THREAD ===
