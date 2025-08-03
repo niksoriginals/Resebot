@@ -146,7 +146,7 @@ def tiktok(target):
         return f"❌ *Invalid Response*:\n```{response.text}```"
 
 # === Auto delete after delay ===
-def auto_delete(chat_id, message_id, delay=20):
+def auto_delete(chat_id, message_id, delay=10):
     def delete():
         try:
             bot.delete_message(chat_id, message_id)
@@ -163,7 +163,6 @@ def handle_reset_command(message):
     parts = message.text.split()
     if len(parts) < 2:
         sent=bot.reply_to(message, "⚠️ Usage: `/reset2 username_or_email`", parse_mode="Markdown")
-        auto_delete(message.chat.id, message.message_id)
         auto_delete(sent.chat.id, sent.message_id)
         return
 
