@@ -6,9 +6,9 @@ import requests
 import telebot
 
 # === CONFIGURATION ===
-BOT_TOKEN = '8165119036:AAF6dkvvJSzF1A-zSrj5dpPnvekEeep1unw'
-GROUP_CHAT_ID = -1002886524212   # Replace with your group ID
-THREAD_ID = 21898            # Replace with the thread/topic ID
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))
+THREAD_ID = int(os.getenv("THREAD_ID"))
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
