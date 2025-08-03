@@ -162,12 +162,14 @@ def handle_reset_command(message):
 
     parts = message.text.split()
     if len(parts) < 2:
-        bot.reply_to(message, "⚠️ Usage: `/reset2 username_or_email`", parse_mode="Markdown")
+        sent=bot.reply_to(message, "⚠️ Usage: `/reset2 username_or_email`", parse_mode="Markdown")
+        auto_delete(message.chat.id, message.message_id)
+        auto_delete(sent.chat.id, sent.message_id)
         return
 
     target = parts[1].strip()
     response_text = send_reset_request(target)
-    bot.reply_to(message, response_text, parse_mode="Markdown")
+    sent=bot.reply_to(message, response_text, parse_mode="Markdown")
     auto_delete(sent.chat.id, sent.message_id)
 
 # === LISTEN ONLY FOR /tiktok COMMAND IN THREAD ===
@@ -179,13 +181,13 @@ def handle_tiktok_command(message):
 
     parts = message.text.split()
     if len(parts) < 2:
-        bot.reply_to(message, "⚠️ Usage: `/tiktok2 username_or_email`", parse_mode="Markdown")
+        sent=bot.reply_to(message, "⚠️ Usage: `/tiktok2 username_or_email`", parse_mode="Markdown")
         auto_delete(sent.chat.id, sent.message_id)
         return
 
     target = parts[1].strip()
     response_text = tiktok(target)
-    bot.reply_to(message, response_text, parse_mode="Markdown")
+    sent=bot.reply_to(message, response_text, parse_mode="Markdown")
     auto_delete(sent.chat.id, sent.message_id)
 # === START BOT ===
 print("🤖 Bot is running...")
