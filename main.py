@@ -146,13 +146,19 @@ def tiktok(target):
         return f"❌ *Invalid Response*:\n```{response.text}```"
 
 # === Auto delete after delay ===
-def auto_delete(chat_id, message_id, delay=10):
+def auto_delete(chat_id, message_id, delay=0):
     def delete():
+        print(f"Trying to delete message {message_id} from chat {chat_id}")
         try:
             bot.delete_message(chat_id, message_id)
+            print(f"Deleted message {message_id}")
         except Exception as e:
             print(f"[❌ Delete Error] {e}")
-    threading.Timer(delay, delete).start()
+    if delay == 0:
+        delete()
+    else:
+        threading.Timer(delay, delete).start()
+
 
 # === LISTEN ONLY FOR /reset COMMAND IN THREAD ===
 @bot.message_handler(commands=['reset2'])
