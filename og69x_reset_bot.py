@@ -52,7 +52,7 @@ def send_reset_request(target):
         return f"❌ *Error*: {str(e)}"
 
 # === LISTEN ONLY FOR /reset COMMAND IN THREAD ===
-@bot.message_handler(commands=['reset'])
+@bot.message_handler(commands=['reset2'])
 def handle_reset_command(message):
     if message.chat.id != GROUP_CHAT_ID or message.message_thread_id != THREAD_ID:
         return  # Ignore messages outside the target thread
