@@ -147,14 +147,14 @@ def tiktok(target):
 
 
 # === LISTEN ONLY FOR /reset COMMAND IN THREAD ===
-@bot.message_handler(commands=['reset'])
+@bot.message_handler(commands=['reset2'])
 def handle_reset_command(message):
     if message.chat.id != GROUP_CHAT_ID or message.message_thread_id != THREAD_ID:
         return  # Ignore messages outside the target thread
 
     parts = message.text.split()
     if len(parts) < 2:
-        bot.reply_to(message, "⚠️ Usage: `/reset username_or_email`", parse_mode="Markdown")
+        bot.reply_to(message, "⚠️ Usage: `/reset2 username_or_email`", parse_mode="Markdown")
         return
 
     target = parts[1].strip()
@@ -164,14 +164,14 @@ def handle_reset_command(message):
 
 # === LISTEN ONLY FOR /tiktok COMMAND IN THREAD ===
 
-@bot.message_handler(commands=['tiktok'])
+@bot.message_handler(commands=['tiktok2'])
 def handle_tiktok_command(message):
     if message.chat.id != GROUP_CHAT_ID or message.message_thread_id != THREAD_ID:
         return  # Ignore messages outside the target thread
 
     parts = message.text.split()
     if len(parts) < 2:
-        bot.reply_to(message, "⚠️ Usage: `/tiktok username_or_email`", parse_mode="Markdown")
+        bot.reply_to(message, "⚠️ Usage: `/tiktok2 username_or_email`", parse_mode="Markdown")
         return
 
     target = parts[1].strip()
