@@ -146,7 +146,7 @@ def tiktok(target):
         return f"❌ *Invalid Response*:\n```{response.text}```"
 
 # === Auto delete after delay ===
-def auto_delete(chat_id, message_id, delay=2):
+def auto_delete(chat_id, message_id, delay=10):
     def delete():
         print(f"Trying to delete message {message_id} from chat {chat_id}")
         try:
