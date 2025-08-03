@@ -5,6 +5,7 @@ import random
 import requests
 import telebot
 import threading
+
 # === CONFIGURATION ===
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))
