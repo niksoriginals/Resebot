@@ -161,14 +161,14 @@ def auto_delete(chat_id, message_id, delay=10):
 
 
 # === LISTEN ONLY FOR /reset COMMAND IN THREAD ===
-@bot.message_handler(commands=['reset2'])
+@bot.message_handler(commands=['reset'])
 def handle_reset_command(message):
     if message.chat.id != GROUP_CHAT_ID or message.message_thread_id != THREAD_ID:
         return  # Ignore messages outside the target thread
 
     parts = message.text.split()
     if len(parts) < 2:
-        sent=bot.reply_to(message, "⚠️ Usage: `/reset2 username_or_email`", parse_mode="Markdown")
+        sent=bot.reply_to(message, "⚠️ Usage: `/reset username_or_email`", parse_mode="Markdown")
         auto_delete(sent.chat.id, sent.message_id)
         return
 
@@ -179,14 +179,14 @@ def handle_reset_command(message):
 
 # === LISTEN ONLY FOR /tiktok COMMAND IN THREAD ===
 
-@bot.message_handler(commands=['tiktok2'])
+@bot.message_handler(commands=['tiktok'])
 def handle_tiktok_command(message):
     if message.chat.id != GROUP_CHAT_ID or message.message_thread_id != THREAD_ID:
         return  # Ignore messages outside the target thread
 
     parts = message.text.split()
     if len(parts) < 2:
-        sent=bot.reply_to(message, "⚠️ Usage: `/tiktok2 username_or_email`", parse_mode="Markdown")
+        sent=bot.reply_to(message, "⚠️ Usage: `/tiktok username_or_email`", parse_mode="Markdown")
         auto_delete(sent.chat.id, sent.message_id)
         return
 
