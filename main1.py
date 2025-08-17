@@ -1,182 +1,173 @@
+# Original variables and functions (UNCHANGED)
+E='STATUS~1'
+W='XMLHttpRequest'
+V='936619743392459'
+U='same-origin'
+T='cors'
+S='empty'
+R='*/*'
+Q='x-requested-with'
+P='x-ig-www-claim'
+O='x-ig-app-id'
+N='sec-fetch-site'
+M='sec-fetch-mode'
+L='sec-fetch-dest'
+K='referer'
+J='accept-language'
+I='accept'
+H='email_or_username'
+F='csrftoken'
+G='User-Agent'
+A=print
+
 import os
-import uuid
-import string
-import random
-import requests
-import telebot
-import threading
+import requests as C, re, json
+from uuid import uuid4
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
-# === CONFIGURATION ===
+def X(email_or_username):
+    A='https://www.instagram.com/accounts/account_recovery_send_ajax/'
+    B={G:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36','Referer':'https://www.instagram.com/accounts/password/reset/','X-CSRFToken':F}
+    D={H:email_or_username,'recaptcha_challenge_field':''}
+    E=C.post(A,headers=B,data=D)
+    return E
+
+def Y(response_text):
+    A=re.search('<b>(.*?)</b>',response_text)
+    if A:return A.group(1)
+    else:return'Unknown'
+
+def Z(username):
+    H='gzip'
+    F='STATUS~2'
+    B=username
+    try:B=B.split('@gmail.com')[0]
+    except:pass
+    D=f"https://www.instagram.com/api/v1/users/web_profile_info/?username={B}"
+    E={I:R,'accept-encoding':H,J:'en-US;q=0.9,en;q=0.7',K:f"https://www.instagram.com/{B}",L:S,M:T,N:U,O:V,P:'0',Q:W}
+    X=C.get(D,headers=E).json()
+    try:Y=X['data']['user']['id']
+    except:
+        return F, f"-FAILED TO SEND THE PASSWORD RESET TO @{B}"
+    D='https://i.instagram.com/api/v1/accounts/send_password_reset/'
+    E={G:'Instagram 6.12.1 Android (30/11; 480dpi; 1080x2004; HONOR; ANY-LX2; HNANY-Q1; qcom; ar_EG_#u-nu-arab)','Cookie':'mid=YwsgcAABAAGsRwCKCbYCaUO5xej3; csrftoken=u6c8M4zaneeZBfR5scLVY43lYSIoUhxL','Cookie2':'$Version=1','Accept-Language':'ar-EG, en-US','X-IG-Connection-Type':'MOBILE(LTE)','X-IG-Capabilities':'AQ==','Accept-Encoding':H}
+    Z={'user_id':Y,'device_id':str(uuid4())}
+    a=C.post(D,headers=E,data=Z).json()
+    try:
+        b=a['obfuscated_email']
+        return F, f"-PASSWORD RESET LINK SENT TO @{B} AT {b}"
+    except:
+        return F, f"-FAILED TO SEND THE PASSWORD RESET TO @{B}"
+
+def a(username_or_email):
+    X='status'
+    G='umwHlWf6r3AGDowkZQb47m'
+    E='STATUS~3'
+    D='message'
+    Y='https://www.instagram.com/api/v1/web/accounts/account_recovery_send_ajax/'
+    Z={F:G,'datr':'_D1dZ0DhNw8dpOJHN-59ONZI','ig_did':'C0CBB4B6-FF17-4C4A-BB83-F3879B996720','mid':'Z109_AALAAGxFePISIe2H_ZcGwTD','wd':'1157x959'}
+    a={I:R,J:'en-US,en;q=0.5','content-type':'application/x-www-form-urlencoded','origin':'https://www.instagram.com','priority':'u=1, i',K:'https://www.instagram.com/accounts/password/reset/?source=fxcal&hl=en','sec-ch-ua':'"Brave";v="131", "Chromium";v="131", "Not_A Brand";v="24"','sec-ch-ua-full-version-list':'"Brave";v="131.0.0.0", "Chromium";v="131.0.0.0", "Not_A Brand";v="24.0.0.0"','sec-ch-ua-mobile':'?0','sec-ch-ua-model':'""','sec-ch-ua-platform':'"Windows"','sec-ch-ua-platform-version':'"10.0.0"',L:S,M:T,N:U,'sec-gpc':'1','user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36','x-asbd-id':'129477','x-csrftoken':G,O:V,P:'0','x-instagram-ajax':'1018880011',Q:W,'x-web-session-id':'ag36cv:1ko17s:9bxl9b'}
+    b={H:username_or_email,'flow':'fxcal'}
+    c=C.post(Y,cookies=Z,headers=a,data=b)
+    try:
+        B=c.json()
+        if B.get(X)=='fail':
+            if B.get('error_type')=='rate_limit_error':
+                return 'TRY USING VPN. IP LIMITED.'
+            elif D in B and isinstance(B[D],list):
+                return f'{E}\nCheck the username or email again.'
+            else:
+                return f'{E}\nError: {B.get(D,"Unknown error")}'
+        elif B.get(X)=='ok':
+            return f'{E}\nMessage: {B.get(D,"No message provided")}'
+        else:
+            return f'{E}\nUnexpected response: {B}'
+    except json.JSONDecodeError:
+        return 'Failed to parse the response as JSON.'
+    except Exception as d:
+        return f'Unexpected error: {str(d)}'
+
+# TELEGRAM BOT LOGIC
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))
-THREAD_ID = int(os.getenv("THREAD_ID"))
-bot = telebot.TeleBot(BOT_TOKEN)
+ALLOWED_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))
+ALLOWED_THREAD_ID = int(os.getenv("THREAD_ID"))
 
-# === IG Reset Request Function ===
-def send_reset_request(target):
-    headers = {
-     "user-agent": f"Instagram 150.0.0.0.000 Android (29/10; 300dpi; 720x1440; {''.join(random.choices(string.ascii_lowercase + string.digits, k=16))}/{''.join(random.choices(string.ascii_lowercase + string.digits, k=16))}; {''.join(random.choices(string.ascii_lowercase + string.digits, k=16))}; {''.join(random.choices(string.ascii_lowercase + string.digits, k=16))}; {''.join(random.choices(string.ascii_lowercase + string.digits, k=16))}; en_GB;)"
-        }
- 
+def start(update, context):
+    update.message.reply_text("Send me an Instagram username or email to attempt a password reset.\nOr use /reset <username_or_email>.\nType /exit to end.")
 
-    data = {
-      "_csrftoken": "".join(random.choices(string.ascii_lowercase +
-                                                          string.ascii_uppercase + string.digits, k=32)),
-                    "_csrftoken": "".join(random.choices(string.ascii_lowercase +
-                                                          string.ascii_uppercase + string.digits, k=32)),
-                    "username": target,
-                    "guid": uuid.uuid4(),
-                    "device_id": uuid.uuid4()
-    }
-
-    if "@" in target:
-        data["user_email"] = target
-    else:
-        data["username"] = target
-
-    try:
-        response = requests.post(
-            "https://i.instagram.com/api/v1/accounts/send_password_reset/",
-            headers=headers,
-            data=data
-        )
-        json_data = response.json()
-
-        if "obfuscated_email" in json_data:
-            return f"✅ *Instagram Reset Sent!*\n🔒 `Email`: `{json_data['obfuscated_email']}`\n\n©️ by @og69x"
-        elif "message" in json_data:
-            return f"❌ *Failed*: {json_data['message']}"
-        else:
-            return f"⚠️ *Unexpected response*\n```{response.text}```"
-    except Exception as e:
-        return f"❌ *Error*: {str(e)}"
-
-
-
-def tiktok(target):
-    email = target
-
-    url = "https://api16-normal-c-alisg.tiktokv.com/passport/email/send_code/"
-
-    params = {
-        'passport-sdk-version': "19",
-        'iid': "7372613882915211014",
-        'device_id': "7372613015445308933",
-        'ac': "wifi",
-        'channel': "googleplay",
-        'aid': "1233",
-        'app_name': "musical_ly",
-        'version_code': "310503",
-        'version_name': "31.5.3",
-        'device_platform': "android",
-        'os': "android",
-        'ab_version': "31.5.3",
-        'ssmix': "a",
-        'device_type': "ART-L29N",
-        'device_brand': "HUAWEI",
-        'language': "ar",
-        'os_api': "29",
-        'os_version': "10",
-        'openudid': "47b07f1a42f3d962",
-        'manifest_version_code': "2023105030",
-        'resolution': "720*1491",
-        'dpi': "320",
-        'update_version_code': "2023105030",
-        '_rticket': "1716570582691",
-        'is_pad': "0",
-        'app_type': "normal",
-        'sys_region': "YE",
-        'mcc_mnc': "42102",
-        'timezone_name': "Asia/Aden",
-        'carrier_region_v2': "421",
-        'app_language': "ar",
-        'carrier_region': "YE",
-        'ac2': "wifi",
-        'uoo': "1",
-        'op_region': "YE",
-        'timezone_offset': "10800",
-        'build_number': "31.5.3",
-        'host_abi': "arm64-v8a",
-        'locale': "ar",
-        'region': "YE",
-        'ts': "1716570584",
-        'cdid': "10f6e4d6-16f9-4a03-a021-4375a1c072c8",
-        'support_webview': "1",
-        'reg_store_region': "ye",
-        'cronet_version': "2fdb62f9_2023-09-06",
-        'ttnet_version': "4.2.152.11-tiktok",
-        'use_store_region_cookie': "1"
-    }
-
-    payload = f"rules_version=v2&account_sdk_source=app&multi_login=1&type=31&email={email}&mix_mode=1"
-
-    headers = {
-        'User-Agent': "com.zhiliaoapp.musically/2023105030 (Linux; U; Android 10; ar_YE; ART-L29N; Build/HUAWEIART-L29N; Cronet/TTNetVersion:2fdb62f9 2023-09-06 QuicVersion:bb24d47c 2023-07-19)",
-        'Content-Type': "application/x-www-form-urlencoded",
-        'sdk-version': "2",
-        'x-ss-req-ticket': "1716570582694",
-        'x-tt-passport-csrf-token': "24a8c5234188c87c654cf17f2ee2dc70",
-        'passport-sdk-version': "19",
-        'x-tt-dm-status': "login=0;ct=1;rt=6",
-        'x-tt-bypass-dp': "1",
-        'x-vc-bdturing-sdk-version': "2.3.3.i18n",
-        'x-ss-stub': "8CC81EE0FB32631749A8267BEB4F3249",
-        'x-tt-trace-id': "00-ab947041106650c879cc0a06053304d1-ab947041106650c8-01",
-        'x-argus': "43ezL+yAGAg/ntTuU/ujVA8I1E6tQEh2+Ay9fZ8xSJzIxShzJLdOIp1oZSMcTmTd79DKgYvYG3Y6EJHQw0hRl3ptm+MgzlmjKohIZsPGftz0AudftXdILG3SqIRh7R4+Kzs+vcYKR/dal+lnAhKgTRRfxYDDBVHNB7kpiQEOkH915AYJ1uF8qGO3uZTHfElq8kc94HsCZBDWv5ZZ6vOB3hPbgc/dLzjxLir837B5Jpe4OllaKgN3L5v3WC+2JJn/VTMk81UwfNSH8l7p7NnIbXJd6m59h9IFWgomPpqEpOhlu+ROhJuWmJ5FS3lZJrPBK0h3mlYhNJbKxRgIaeylVZkljvuFZ8fwPxvog2U6obOSEXQATIjZMhT+BoSTcvpdGn/P55O9J3IR/0hlDwzx3Sp3/xqsfp8l/QmArv4ha70TG1by0QDdvXAfBzs/JJZQ9qku/JAZnYfgXoPfrhQbdwjJf2Gmj8XphbcKIp/oEUzSOs5Fjc3pbRgfLVBPbTf/0yEVGlwv4VblaBxOsAaqJuRY",
-        'x-gorgon': "84040039000073c5d5fa441990245151415451f12ba24072b6e4",
-        'x-khronos': "1716570578",
-        'x-ladon': "DOCmYT1SFgBtXIky8cBH+g/ymcAe+237nMdEAu2IPa2oUq7O",
-    }
-
-
-    session = requests.Session()
-
-
-    try:
-        response = session.post(url, params=params, data=payload, headers=headers)
-        data = response.json()
-        
-        if data.get("message") == "success":
-            obfuscated_email = data["data"]["email"]
-            return f"✅ *TikTok Reset Sent!*\n🔒 `Email`: `{obfuscated_email}`\n\n©️ by @og69x"
-        else:
-            return f"❌ *Failed*: `{data.get('message', 'Unknown error')}`"
-    except requests.exceptions.RequestException as e:
-        return f"❌ *Request Error*: `{str(e)}`"
-    except ValueError:
-        return f"❌ *Invalid Response*:\n```{response.text}```"
-
-# === Auto delete after delay ===
-def auto_delete(chat_id, message_id, delay=10):
-    def delete():
-        print(f"Trying to delete message {message_id} from chat {chat_id}")
-        try:
-            bot.delete_message(chat_id, message_id)
-            print(f"Deleted message {message_id}")
-        except Exception as e:
-            print(f"[❌ Delete Error] {e}")
-    if delay == 0:
-        delete()
-    else:
-        threading.Timer(delay, delete).start()
-
-
-# === LISTEN ONLY FOR /reset COMMAND IN THREAD ===
-@bot.message_handler(commands=['reset'])
-def handle_reset_command(message):
-    if message.chat.id != GROUP_CHAT_ID or message.message_thread_id != THREAD_ID:
-        return  # Ignore messages outside the target thread
-
-    parts = message.text.split()
-    if len(parts) < 2:
-        sent=bot.reply_to(message, "⚠️ Usage: `/reset username_or_email`", parse_mode="Markdown")
-        auto_delete(sent.chat.id, sent.message_id)
+def handle_input(update, context):
+    if update.effective_chat.id != ALLOWED_CHAT_ID:
+        return
+    if update.message.message_thread_id != ALLOWED_THREAD_ID:
         return
 
-    target = parts[1].strip()
-    response_text = send_reset_request(target)
-    sent=bot.reply_to(message, response_text, parse_mode="Markdown")
-    auto_delete(sent.chat.id, sent.message_id)
+    B = update.message.text.strip()
+    if B.lower() == 'exit':
+        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text="Exiting session.")
+        return
 
-print("🤖 Bot is running...")
-bot.infinity_polling()
+    # ✅ Try STATUS~1
+    D = X(B)
+    if D.status_code == 200:
+        b = Y(D.text)
+        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=f"STATUS~1\n-PASSWORD RESET LINK SENT TO @{B} TO {b}")
+        return
+
+    # ✅ Try STATUS~2
+    status2, msg2 = Z(B)
+    if "PASSWORD RESET LINK SENT" in msg2:
+        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=f"{status2}\n{msg2}")
+        return
+
+    # ✅ Try STATUS~3
+    msg3 = a(B)
+    if "PASSWORD RESET" in msg3 or "Message:" in msg3:
+        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=msg3)
+
+def reset_command(update, context):
+    if update.effective_chat.id != ALLOWED_CHAT_ID:
+        return
+    if update.message.message_thread_id != ALLOWED_THREAD_ID:
+        return
+
+    args = context.args
+    if not args:
+        update.message.reply_text("Usage: /reset <username_or_email>")
+        return
+
+    B = args[0].strip()
+
+    # ✅ Try STATUS~1
+    D = X(B)
+    if D.status_code == 200:
+        b = Y(D.text)
+        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=f"STATUS~1\n-PASSWORD RESET LINK SENT TO @{B} TO {b}")
+        return
+
+    # ✅ Try STATUS~2
+    status2, msg2 = Z(B)
+    if "PASSWORD RESET LINK SENT" in msg2:
+        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=f"{status2}\n{msg2}")
+        return
+
+    # ✅ Try STATUS~3
+    msg3 = a(B)
+    if "PASSWORD RESET" in msg3 or "Message:" in msg3:
+        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=msg3)
+    else:
+        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text="All methods failed or unexpected error.")
+
+def main():
+    updater = Updater(BOT_TOKEN, use_context=True)
+    dp = updater.dispatcher
+
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("reset", reset_command))  # ✅ New command
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_input))
+
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
