@@ -21,9 +21,10 @@ G='User-Agent'
 A=print
 
 import os
+import asyncio
 import requests as C, re, json
 from uuid import uuid4
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
 def X(email_or_username):
     A='https://www.instagram.com/accounts/account_recovery_send_ajax/'
@@ -93,10 +94,10 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 ALLOWED_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))
 ALLOWED_THREAD_ID = int(os.getenv("THREAD_ID"))
 
-def start(update, context):
-    update.message.reply_text("Send me an Instagram username or email to attempt a password reset.\nOr use /reset <username_or_email>.\nType /exit to end.")
+async def start(update, context):
+    await update.message.reply_text("Send me an Instagram username or email to attempt a password reset.\nOr use /reset <username_or_email>.\nType /exit to end.")
 
-def handle_input(update, context):
+async def handle_input(update, context):
     if update.effective_chat.id != ALLOWED_CHAT_ID:
         return
     if update.message.message_thread_id != ALLOWED_THREAD_ID:
@@ -104,28 +105,28 @@ def handle_input(update, context):
 
     B = update.message.text.strip()
     if B.lower() == 'exit':
-        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text="Exiting session.")
+        await context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text="Exiting session.")
         return
 
     # ✅ Try STATUS~1
     D = X(B)
     if D.status_code == 200:
         b = Y(D.text)
-        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=f"STATUS~1\n-PASSWORD RESET LINK SENT TO @{B} TO {b}")
+        await context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=f"Form Handler\n-PASSWORD RESET LINK SENT TO @{B}")
         return
 
     # ✅ Try STATUS~2
     status2, msg2 = Z(B)
     if "PASSWORD RESET LINK SENT" in msg2:
-        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=f"{status2}\n{msg2}")
+        await context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=f"{status2}\n{msg2}")
         return
 
     # ✅ Try STATUS~3
     msg3 = a(B)
     if "PASSWORD RESET" in msg3 or "Message:" in msg3:
-        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=msg3)
+        await context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=msg3)
 
-def reset_command(update, context):
+async def reset_command(update, context):
     if update.effective_chat.id != ALLOWED_CHAT_ID:
         return
     if update.message.message_thread_id != ALLOWED_THREAD_ID:
@@ -133,41 +134,40 @@ def reset_command(update, context):
 
     args = context.args
     if not args:
-        update.message.reply_text("Usage: /reset <username_or_email>")
+        await update.message.reply_text("Usage: /reset <username_or_email>")
         return
 
     B = args[0].strip()
 
     # ✅ Try STATUS~1
     D = X(B)
+
     if D.status_code == 200:
         b = Y(D.text)
-        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=f"STATUS~1\n-PASSWORD RESET LINK SENT TO @{B} TO {b}")
+        await context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=f"STATUS~1\n-PASSWORD RESET LINK SENT TO @{B} TO {b}")
         return
 
     # ✅ Try STATUS~2
     status2, msg2 = Z(B)
     if "PASSWORD RESET LINK SENT" in msg2:
-        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=f"{status2}\n{msg2}")
+        await context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=f"{status2}\n{msg2}")
         return
 
     # ✅ Try STATUS~3
     msg3 = a(B)
     if "PASSWORD RESET" in msg3 or "Message:" in msg3:
-        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=msg3)
+        await context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text=msg3)
     else:
-        context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text="All methods failed or unexpected error.")
+        await context.bot.send_message(chat_id=ALLOWED_CHAT_ID, message_thread_id=ALLOWED_THREAD_ID, text="All methods failed or unexpected error.")
 
 def main():
-    updater = Updater(BOT_TOKEN, use_context=True)
-    dp = updater.dispatcher
+    application = Application.builder().token(BOT_TOKEN).build()
 
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("reset", reset_command))  # ✅ New command
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_input))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("reset", reset_command))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_input))
 
-    updater.start_polling()
-    updater.idle()
+    application.run_polling()
 
 if __name__ == '__main__':
     main()
