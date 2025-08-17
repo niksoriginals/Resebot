@@ -178,23 +178,5 @@ def handle_reset_command(message):
     sent=bot.reply_to(message, response_text, parse_mode="Markdown")
     auto_delete(sent.chat.id, sent.message_id)
 
-# === LISTEN ONLY FOR /tiktok COMMAND IN THREAD ===
-
-@bot.message_handler(commands=['tiktok'])
-def handle_tiktok_command(message):
-    if message.chat.id != GROUP_CHAT_ID or message.message_thread_id != THREAD_ID:
-        return  # Ignore messages outside the target thread
-
-    parts = message.text.split()
-    if len(parts) < 2:
-        sent=bot.reply_to(message, "⚠️ Usage: `/tiktok username_or_email`", parse_mode="Markdown")
-        auto_delete(sent.chat.id, sent.message_id)
-        return
-
-    target = parts[1].strip()
-    response_text = tiktok(target)
-    sent=bot.reply_to(message, response_text, parse_mode="Markdown")
-    auto_delete(sent.chat.id, sent.message_id)
-# === START BOT ===
 print("🤖 Bot is running...")
 bot.infinity_polling()
